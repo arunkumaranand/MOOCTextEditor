@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 public abstract class Document {
 
-	private static String vowels = "aeiouy";
 	private String text;
 	
 	/** Create a new document from the given text.
@@ -43,74 +42,32 @@ public abstract class Document {
 		return tokens;
 	}
 	
-	/** This is a helper function that returns the number of syllables
-	 * in a word.  You should write this and use it in your 
-	 * BasicDocument class.
-	 * 
-	 * You will probably NOT need to add a countWords or a countSentences 
-	 * method here.  The reason we put countSyllables here because we'll 
-	 * use it again next week when we implement the EfficientDocument class.
-	 * 
-	 * For reasons of efficiency you should not create Matcher or Pattern 
-	 * objects inside this method. Just use a loop to loop through the 
-	 * characters in the string and write your own logic for counting 
-	 * syllables.
-	 * 
-	 * @param word  The word to count the syllables in
-	 * @return The number of syllables in the given word, according to 
-	 * this rule: Each contiguous sequence of one or more vowels is a syllable, 
-	 *       with the following exception: a lone "e" at the end of a word 
-	 *       is not considered a syllable unless the word has no other syllables. 
-	 *       You should consider y a vowel.
-	 */
+	// This is a helper function that returns the number of syllables
+	// in a word.  You should write this and use it in your 
+	// BasicDocument class.
 	protected static int countSyllables(String word)
 	{
-		// TODO: Implement this method so that you can call it from the 
-	    // getNumSyllables method in BasicDocument (module 2) and 
-	    // EfficientDocument (module 3).
-		//System.out.println("");
-		//System.out.println("countSyllables for word: " + word);
-		
-		int allSyllables = 0; // count all 
-		int curPos = 0;
-		
-		char[] allChars = word.toLowerCase().toCharArray();
-		while(curPos<allChars.length) {
-			char c = allChars[curPos]; // current char
-			//System.out.println("- Checking character: " + c);
-			
-			// check if we have a vowel
-			if (isVowel(c)) {
-				// ok, is a vowel, add a syllable
-				allSyllables++;
-				//System.out.println("- YES! OK, we have it, s. up to now:  " + allSyllables);				
-				// check also next character(s)
-				while( (curPos+1) <allChars.length && isVowel(allChars[curPos+1])) {
-					//System.out.println("- Next one is a s. too:  " + allChars[curPos+1]);									
-					curPos++;
-				}
+	    //System.out.print("Counting syllables in " + word + "...");
+		int numSyllables = 0;
+		boolean newSyllable = true;
+		String vowels = "aeiouy";
+		char[] cArray = word.toCharArray();
+		for (int i = 0; i < cArray.length; i++)
+		{
+		    if (i == cArray.length-1 && Character.toLowerCase(cArray[i]) == 'e' 
+		    		&& newSyllable && numSyllables > 0) {
+                numSyllables--;
+            }
+		    if (newSyllable && vowels.indexOf(Character.toLowerCase(cArray[i])) >= 0) {
+				newSyllable = false;
+				numSyllables++;
 			}
-			// go check the next char
-			curPos++;
+			else if (vowels.indexOf(Character.toLowerCase(cArray[i])) < 0) {
+				newSyllable = true;
+			}
 		}
-		// lone e at the end case
-		if (allSyllables>1 && allChars[curPos-1] == 'e' && !isVowel(allChars[curPos-2])) {
-			allSyllables--;
-			//System.out.println("- Lone e at the end, dec. to: " + allSyllables);
-		}
-		//System.out.println("countSyllables for word: " + word + " = " + allSyllables);
-		
-	    return allSyllables;
-	}
-	
-	// check if char is vowel (input char should be lower case)
-	private static boolean isVowel(char c) {
-		// this would be easier with a regex, but it seems I must not use it
-		if (Document.vowels.indexOf(c) < 0) {
-			return false;
-		} else {
-			return true;
-		}
+		//System.out.println( "found " + numSyllables);
+		return numSyllables;
 	}
 	
 	/** A method for testing
@@ -173,19 +130,14 @@ public abstract class Document {
 	/** return the Flesch readability score of this document */
 	public double getFleschScore()
 	{
-	    // TODO: You will play with this method in week 1, and 
-		// then implement it in week 2
-	    
-		double words = (double)this.getNumWords();
-		double sentences = (double)this.getNumSentences();
-		double syllables = (double)this.getNumSyllables();
+		//System.out.println("Words: " + getNumWords() );
+		//System.out.println("Sent.: " + getNumSentences() );
+		//System.out.println("Syll.: " + getNumSyllables() );
 		
-		double flesch = 206.835 
-				- 1.015*(words/sentences) 
-				- 84.6*(syllables/words);
-		
-		//double textLength = this.text.length();
-	    return flesch;
+		double wordCount = (double)getNumWords();
+		return 206.835 - (1.015 * ((wordCount)/getNumSentences())) 
+				- (84.6 * (((double)getNumSyllables())/wordCount));
+	
 	}
 	
 	

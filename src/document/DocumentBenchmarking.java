@@ -24,7 +24,7 @@ public class DocumentBenchmarking {
 		
 	    // The amount of characters to increment each step
 	    // You can play around with this
-		int increment = 20000;
+		int increment = 100000;
 
 		// The number of steps to run.  
 		// You can play around with this.
@@ -34,6 +34,8 @@ public class DocumentBenchmarking {
 		// You can play around with this.
 		int start = 50000;
 		
+		System.out.println("Chars\tBasicTime\tEfficientTime");
+		
 		// TODO: Fill in the rest of this method so that it runs two loops
 		// and prints out timing results as described in the assignment 
 		// instructions and following the pseudocode below.
@@ -41,9 +43,45 @@ public class DocumentBenchmarking {
 				numToCheck += increment)
 		{
 			// numToCheck holds the number of characters that you should read from the 
-			// file to create both a BasicDocument and an EfficientDocument.  
+			// file to create both a BasicDocument and an EfficientDocument.
 			
-			/* Each time through this loop you should:
+			/* Each time through this loop you should: 
+			 * 1. Print out numToCheck followed by a tab (\t) (NOT a newline)
+			 * */
+			System.out.print(numToCheck + "\t");
+			
+			/* 2. Read numToCheck characters from the file into a String */
+			String testText = getStringFromFile(textfile, numToCheck);
+			double tmpFlesch = 0;
+			
+			/*  3. Time a loop that runs trials times (trials is the variable above) that:
+			 *  a. Creates a BasicDocument 
+			 *  b. Calls fleshScore on this document */
+			
+			long startTimeBd = System.nanoTime();
+			for(int i = 0; i < trials; i++) {
+				BasicDocument bd = new BasicDocument(testText);
+				tmpFlesch = bd.getFleschScore();
+			}
+			long endTimeBd = System.nanoTime();
+			long durationBd = ((endTimeBd - startTimeBd)/1000000);			
+			System.out.print(durationBd + "\t");
+			
+			/*  5. Time a loop that runs trials times (trials is the variable above) that:
+			 *     a. Creates an EfficientDocument 
+			 *     b. Calls fleshScore on this document */		
+
+			long startTimeEd = System.nanoTime();
+			for(int i = 0; i < trials; i++) {
+				EfficientDocument ed = new EfficientDocument(testText);
+				tmpFlesch = ed.getFleschScore();
+			}
+			long endTimeEd = System.nanoTime();
+			long durationEd = ((endTimeEd - startTimeEd)/1000000);			
+			System.out.print(durationEd + "\n");			
+			
+			
+			/*
 			 * 1. Print out numToCheck followed by a tab (\t) (NOT a newline)
 			 * 2. Read numToCheck characters from the file into a String
 			 *     Hint: use the helper method below.
