@@ -14,22 +14,22 @@ public class DictionaryBenchmarking {
 
 	    // Run each test more than once to get bigger numbers and less noise.
 	    // You can try playing around with this number.
-	    int trials = 500;
+	    int trials = 1000;
 
 	    // The text to test on
 	    String dictFile = "data/dict.txt";
 		
 	    // The amount of words to increment each step
 	    // You can play around with this
-		int increment = 2000;
+		int increment = 1000;
 
 		// The number of steps to run.  
 		// You can play around with this.
-		int numSteps = 20;
+		int numSteps = 40;
 		
 		// The number of words to start with. 
 		// You can play around with this.
-		int start = 50000;
+		int start = 20000;
 		
 		String notInDictionary = "notaword";
 		
