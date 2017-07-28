@@ -76,7 +76,28 @@ public class NearbyWords implements SpellingSuggest {
 	 * @return
 	 */
 	public void insertions(String s, List<String> currentList, boolean wordsOnly ) {
-		// TODO: Implement this method  
+		// loop through letters and insert at index or append
+		for(int index = 0; index <= s.length(); index++){
+			// try to insert from a-z
+			for(int charCode = (int)'a'; charCode <= (int)'z'; charCode++) {
+
+				// use StringBuffer for an easy interface to permuting the 
+				// letters in the String
+				StringBuffer sb = new StringBuffer(s);
+				// if index = s.length() -> append
+				sb.insert(index, (char)charCode);
+
+				// if the item isn't in the list, isn't the original string, and
+				// (if wordsOnly is true) is a real word, add to the list
+				
+				/*if(!currentList.contains(sb.toString()) && 
+						(!wordsOnly||dict.isWord(sb.toString())) ) {
+					currentList.add(sb.toString());
+				}*/
+				
+				addWordToList(sb.toString(), currentList, wordsOnly);
+			}
+		}
 	}
 
 	/** Add to the currentList Strings that are one character deletion away
@@ -87,7 +108,34 @@ public class NearbyWords implements SpellingSuggest {
 	 * @return
 	 */
 	public void deletions(String s, List<String> currentList, boolean wordsOnly ) {
-		// TODO: Implement this method
+		// for loop through letters
+		for(int index = 0; index < s.length(); index++){
+			// remove letter at position index
+			StringBuffer sb = new StringBuffer(s);
+			// if index = s.length() -> append
+			sb.deleteCharAt(index);
+			addWordToList(sb.toString(), currentList, wordsOnly);
+		}
+		
+	}
+	
+	/** add string to list if it's not there, but check if it's a word if the 
+	 * param wordsOnly is true  
+	 * @param s The original String
+	 * @param currentList is the list of words to append modified words 
+	 * @param wordsOnly controls whether to return only words or any String
+	 * @return
+	 */	
+	private void addWordToList(String s, List<String> currentList, boolean wordsOnly) {
+		if(!currentList.contains(s)) {
+			if	(wordsOnly) {
+				if (dict.isWord(s) ) {
+					currentList.add(s);
+				}
+			} else {
+				currentList.add(s);
+			}
+		}		
 	}
 
 	/** Add to the currentList Strings that are one character deletion away
@@ -98,26 +146,65 @@ public class NearbyWords implements SpellingSuggest {
 	 */
 	@Override
 	public List<String> suggestions(String word, int numSuggestions) {
-
+		// Input:  word for which to provide number of spelling suggestions
+		// Input:  number of maximum suggestions to provide
+		// Output: list of spelling suggestions
+		
 		// initial variables
+		// - Create a queue to hold words to explore
+		// - Create a visited set to avoid looking at the same String repeatedly
+		// - Create list of real words to return when finished		
+		
 		List<String> queue = new LinkedList<String>();     // String to explore
 		HashSet<String> visited = new HashSet<String>();   // to avoid exploring the same  
 														   // string multiple times
 		List<String> retList = new LinkedList<String>();   // words to return
 		 
+		// optimization: skip words not in dict
+		boolean optimize = false;
 		
 		// insert first node
+		// - Add the initial word to the queue and visited
 		queue.add(word);
-		visited.add(word);
-					
-		// TODO: Implement the remainder of this method, see assignment for algorithm
+		visited.add(word);		
 		
+		while(queue.size()>0 && retList.size() < numSuggestions) {
+			// get 1st word from queue
+			String curr = queue.remove(0);
+			
+			// get list of neighbors
+			List<String> neighbors = distanceOne(curr, true);
+			
+			// for each n in the list of neighbors
+			for(String n : neighbors) {
+				// if n is not visited
+				if (!visited.contains(n)){
+					// add to list of visited & back of the queue
+					visited.add(n);
+					if (optimize && dict.isWord(n)) {
+						// check if it's a word and add
+						queue.add(n);
+					} else {
+						// just add
+						queue.add(n);
+					}
+					
+					// if n is a word in the dictionary
+					if (dict.isWord(n)) {
+						// add n to the list of words to return
+						retList.add(n);
+					}
+				}
+			}
+		}
+		
+		// return the list of real words
 		return retList;
 
 	}	
 
    public static void main(String[] args) {
-	   /* basic testing code to get started
+	   /* basic testing code to get started */
 	   String word = "i";
 	   // Pass NearbyWords any Dictionary implementation you prefer
 	   Dictionary d = new DictionaryHashSet();
@@ -131,7 +218,7 @@ public class NearbyWords implements SpellingSuggest {
 	   List<String> suggest = w.suggestions(word, 10);
 	   System.out.println("Spelling Suggestions for \""+word+"\" are:");
 	   System.out.println(suggest);
-	   */
+	   
    }
 
 }
